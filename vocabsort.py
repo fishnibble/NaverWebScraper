@@ -3,78 +3,64 @@ import urllib.request
 from bs4 import BeautifulSoup
 import os, os.path
 
+class naverscrape(object):
+    def __init__(self, urlpayload, path):
+        self.urlpayload = urlpayload
+        self.path = path
+        url = requests.get(urlpayload)
+        self.soup = BeautifulSoup(url, "html.parser")
 
-x = requests.get('http://www.memrise.com/course/283033/korean-made-simple-go-billy-korean/')
+    def payloadprep(self):
+        url = []
+        for text in self.soup.find_all_next('div', class_='levels clearfix'):
+            for links in text.find_all('a'):
+                url.append("http://www.memrise.com" + links.get('href'))
+        return url
+    # Goes to main list of chapters and grabs all the urls for each chapter
 
-url = x.content
-
-soup = BeautifulSoup(url, "html.parser")
-
-url = []
-path = 'C:/Users/fish/Desktop/untitled/naverscraper/'
-souparray = []
-test = ""
-helper = []
-me = 0
-sublink = []
-subcount = 0
-
-for text in soup.find_all('div', class_='levels clearfix'):
-    for links in text.find_all('a'):
-        url.append("http://www.memrise.com" + links.get('href'))
-
-for link in url:
-    sublink.append(link[72:-1])
-    os.mkdir(path, sublink[subcount])
-    subcount += 1
-
-    for link in url:
-        goto = requests.get(link).content
-        soup = BeautifulSoup(goto, "html.parser")
-        helper.append(test)
-        souparray.append(helper)
-        test = ''
+    def getvocab(self):
+        url = self.payloadprep()
+        souparray = []
         helper = []
+        vocab = ''
+        for link in url:
+            goto = requests.get(url).content
+            soup = BeautifulSoup(goto, "html.parser")
+            helper.append(vocab)
+            souparray.append(helper)
+            test = ''
+            helper = []
+            for vocab in soup.find_all('div', attrs={"class": "col_a col text"}):
+                test += vocab.text + '\n'
+                if '갑자기' in test:
+                    souparray.append([test])
+                #need to fix this loop so it can be used for any course
+        return souparray
+        #Goes to everything in the payload and grabs all the vocab in every URL
+        #col_a col text is every all the korean text is at
 
-        for vocab in soup.find_all('div', attrs={"class": "col_a col text"}):
-            test += vocab.text + '\n'
-            if '갑자기' in test:
-                souparray.append([test])
+    def makefolders(self):
+        counter = 0
+        vocab = self.getvocab()
+        if not os.path.isdir(self.path + "{0}".format(counter)):
+            os.mkdir(self.path + "{}".format(counter))
 
-                for words in souparray:
-                    if not os.path.isdir(path + "{}".format(me)):
-                        os.mkdir(path + "{}".format(me))
-                    with open(path + "{}".format(me) + '/{}'.format(me) + '.txt', 'w', encoding='utf-8') as txtf:
-
-                        str1 = ''.join(words)
-                        txtf.write(str1)
-                        str1 = ""
-                        txtf.close()
-                    me += 1
-rootdir = 'C:/Users/fish/Desktop/untitled/naverscraper/'
-for root, dirnames, filenames in os.walk(rootdir):
-        for files in filenames:
-            if files.endswith('.txt'):
-                f = open(os.path.join(root, files) ,'r', encoding='UTF-8')
-                for stuff in f:
-                    vocab = stuff.replace('.', '')
-                    rawurl = requests.get('http://m.krdic.naver.com/search/all/0/{0}?format=HTML&isMobile=true'.format(vocab)).content
-                    soup = BeautifulSoup(rawurl, "html.parser")
-                    mp3Url = []
-                    for text in soup.find_all('div', class_='dt'):
-                        for links in text.find_all('a'):
-                            mp3Url.append(links.get('href'))
-                        try:
-                            urllib.request.urlretrieve(mp3Url[1], root + '/{}.mp3'.format(stuff).replace('\n', ''))
-                            print("Downloaded {0}".format(stuff) + 'in {0}'.format(root))
-                        except:
-                            pass
-
-
-
-
-
-
-
-
+    def getmp3(self):
+        for root, dirnames, filenames in os.walk(self.path):
+            for files in filenames:
+                if files.endswith('.txt'):
+                    f = open(os.path.join(root, files) ,'r', encoding='UTF-8')
+                    for stuff in f:
+                        vocab = stuff.replace('.', '')
+                        rawurl = requests.get('http://m.krdic.naver.com/search/all/0/{0}?format=HTML&isMobile=true'.format(vocab)).content
+                        soup = BeautifulSoup(rawurl, "html.parser")
+                        mp3url = []
+                        for text in soup.find_all('div', class_='dt'):
+                            for links in text.find_all('a'):
+                                mp3url.append(links.get('href'))
+                            try:
+                                urllib.request.urlretrieve(mp3url[1], root + '/{}.mp3'.format(stuff).replace('\n', ''))
+                                print("Downloaded {0}".format(stuff) + 'in {0}'.format(root))
+                            except:
+                                pass
 
