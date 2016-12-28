@@ -26,18 +26,19 @@ class naverscrape(object):
         url = self.payloadprep()
         souparray = []
         helper = []
-        vocab = ''
+        test = ''
+
         for link in url:
-            goto = requests.get(url).content
+            goto = requests.get(link).content
             soup = BeautifulSoup(goto, "html.parser")
-            helper.append(vocab)
+            helper.append(test)
             souparray.append(helper)
             test = ''
             helper = []
             for vocab in soup.find_all('div', attrs={"class": "col_a col text"}):
-                test += vocab.text + '\n'
-                if '갑자기' in test:
-                    souparray.append([test])
+                test += vocab.text + ' '
+                # if '갑자기' in test:
+                # souparray.append([test.replace('.', " ")])
                     # need to fix this loop so it can be used for any course
         return souparray
         # Goes to everything in the payload and grabs all the vocab in every URL
@@ -50,6 +51,26 @@ class naverscrape(object):
             if not os.path.isdir(self.path + "{0}".format(counter)):
                 os.mkdir(self.path + "{}".format(counter))
                 counter += 1
+
+    def getenglish(self):
+        url = self.payloadprep()
+        souparray = []
+        helper = []
+        test = ''
+
+        for link in url:
+            goto = requests.get(link).content
+            soup = BeautifulSoup(goto, "html.parser")
+            helper.append(test)
+            souparray.append(helper)
+            test = ''
+            helper = []
+            for vocab in soup.find_all('div', attrs={"class": "col_b col text"}):
+                test += vocab.text + ' '
+                # if '갑자기' in test:
+                # souparray.append([test.replace('.', " ")])
+                # need to fix this loop so it can be used for any course
+        return souparray
 
     def getmp3(self):
         for root, dirnames, filenames in os.walk(self.path):
