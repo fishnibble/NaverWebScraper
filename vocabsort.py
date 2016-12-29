@@ -36,7 +36,7 @@ class naverscrape(object):
             test = ''
             helper = []
             for vocab in soup.find_all('div', attrs={"class": "col_a col text"}):
-                test += vocab.text + ' '
+                test += vocab.text + '\n'
                 # if '갑자기' in test:
                 # souparray.append([test.replace('.', " ")])
                     # need to fix this loop so it can be used for any course
@@ -91,3 +91,16 @@ class naverscrape(object):
                                 print("Downloaded {0}".format(stuff) + 'in {0}'.format(root))
                             except:
                                 pass
+
+    def writevocab(self, korea, english = None):
+
+        count = 1
+        if english == None:
+            for words in korea:
+                with open(self.path + "{}".format(count) + '/{}'.format(count) + '.txt', 'w', encoding='utf-8') as txtf:
+                    str1 = ''.join(words)
+                    txtf.write(str1)
+                    str1 = ''
+                count +=1
+        else:
+            pass
