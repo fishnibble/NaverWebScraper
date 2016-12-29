@@ -26,17 +26,14 @@ class naverscrape(object):
         url = self.payloadprep()
         souparray = []
         helper = []
-        test = ''
 
         for link in url:
             goto = requests.get(link).content
             soup = BeautifulSoup(goto, "html.parser")
-            helper.append(test)
             souparray.append(helper)
-            test = ''
             helper = []
             for vocab in soup.find_all('div', attrs={"class": "col_a col text"}):
-                test += vocab.text + '\n'
+                helper.append([vocab.text])
                 # if '갑자기' in test:
                 # souparray.append([test.replace('.', " ")])
                     # need to fix this loop so it can be used for any course
@@ -45,7 +42,7 @@ class naverscrape(object):
         # col_a col text is every all the korean text is at
 
     def makefolders(self):
-        counter = 1
+        counter = 0
         urls = self.payloadprep()
         for links in urls:
             if not os.path.isdir(self.path + "{0}".format(counter)):
@@ -56,17 +53,13 @@ class naverscrape(object):
         url = self.payloadprep()
         souparray = []
         helper = []
-        test = ''
-
         for link in url:
             goto = requests.get(link).content
             soup = BeautifulSoup(goto, "html.parser")
-            helper.append(test)
             souparray.append(helper)
-            test = ''
             helper = []
             for vocab in soup.find_all('div', attrs={"class": "col_b col text"}):
-                test += vocab.text + ' '
+                helper.append([vocab.text])
                 # if '갑자기' in test:
                 # souparray.append([test.replace('.', " ")])
                 # need to fix this loop so it can be used for any course
@@ -93,14 +86,19 @@ class naverscrape(object):
                                 pass
 
     def writevocab(self, korea, english = None):
-
-        count = 1
+        count = 0
         if english == None:
             for words in korea:
-                with open(self.path + "{}".format(count) + '/{}'.format(count) + '.txt', 'w', encoding='utf-8') as txtf:
+                with open(self.path + "{}".format(count) + '/korean{}'.format(count) + '.txt', 'w', encoding='utf-8') as txtf:
                     str1 = ''.join(words)
-                    txtf.write(str1)
-                    str1 = ''
+                    txtf.write(str1 + '\n')
                 count +=1
         else:
-            pass
+                for kr, eng in zip(korea, english):
+                    with open(self.path + "{}".format(count) + '/korean{}'.format(count) + '.txt', 'w',
+                         encoding='utf-8') as txtf:
+                        for kr1, eng1 in zip(kr,eng):
+                            str1 = ''.join(kr1)
+                            str2 = ''.join(eng1)
+                            txtf.write(str1 + ", " + str2 + '\n')
+                        count +=1
